@@ -10,7 +10,7 @@ import sys
 from threading import Thread, Event
 
 from kalliope import Utils
-from runner import OpenWWRunner
+from openww_runner import OpenWWRunner
 
 logging.basicConfig()
 logger = logging.getLogger("kalliope")
