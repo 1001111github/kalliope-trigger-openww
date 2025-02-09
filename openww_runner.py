@@ -12,9 +12,7 @@
 
 import atexit
 import logging
-import time
 import datetime
-from subprocess import PIPE, Popen
 from threading import Thread, Event
 
 from pyaudio import PyAudio, paInt16
@@ -23,6 +21,7 @@ import numpy as np
 from openwakeword.model import Model
 
 from kalliope.core.ConfigurationManager import SettingLoader
+from kalliope.core.Cortex import Cortex
 
 logging.basicConfig()
 logger = logging.getLogger("kalliope")
@@ -44,13 +43,12 @@ Openwakeword options
             enable_speex_noise_suppression=args.noise_suppression,
             vad_threshold = args.vad_threshold,
             lots of others
-Not used until v0.50 currently in python 3.11 :(
             inference_framework=inf_engine
             threshold 
 """
 class OpenWWRunner(object):
-    def __init__(self, keyword, inf_engine, stream=None, on_activation=lambda: None, ):
-        self.keyword = keyword
+    def __init__(self, keywords, inf_engine, stream=None, on_activation=lambda: None, ):
+        self.keywords = keywords
         self.stream = stream
         self.on_activation = on_activation
 
@@ -63,8 +61,8 @@ class OpenWWRunner(object):
         self.thread = None
         self.running = False
         self.is_paused = False
-        self.owwModel = Model(wakeword_models=[keyword])
-        logger.debug("[OpenWWRunner] Loaded wakeword model  : %s" % keyword)
+        self.owwModel = Model(wakeword_models=keywords, inference_framework=inf_engine)
+        logger.debug("[OpenWWRunner] Loaded wakeword model  : %s" % keywords)
 
         atexit.register(self.stop)
 
@@ -110,8 +108,9 @@ class OpenWWRunner(object):
             if self.is_paused:
                 continue
 
-            # assuption only one model
-            model_name = next(iter(self.owwModel.models))
+# predictions and threshold
+# multiple models/keywords
+#            model_name = next(iter(self.owwModel.models))
 # need threshold for this
 #            prediction = self.owwModel.predict(audio, patience={model_name, self.trigger_level})
             
@@ -121,6 +120,7 @@ class OpenWWRunner(object):
                     detect_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     logger.debug(f'Detected activation from \"{mdl}\" model with time {detect_time}!')
 
-                   # reset predictions, return to parent via callback
+                   # reset predictions to prevent activation next time around, return to parent via callback
                     self.owwModel.reset()
+                    Cortex.save("kalliope_last_wakeword", mdl[0].partition('.')[0])
                     self.on_activation()

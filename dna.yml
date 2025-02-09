@@ -1,0 +1,9 @@
+---
+  name: "openww"
+  type: "trigger"
+  author: "Kalliope project team + djm"
+  kalliope_supported_version:
+    - 0.7
+  tags:
+    - "trigger"
+    - "openww"

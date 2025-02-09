@@ -1,0 +1,11 @@
+---
+- name: openwakeword
+  hosts: localhost
+  gather_facts: no
+  connection: local
+  become: true
+  tasks:
+    - name: "openwakeword"
+      pip:
+        name: openwakeword
+        executable: pip3

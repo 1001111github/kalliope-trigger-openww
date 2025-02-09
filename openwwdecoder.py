@@ -3,10 +3,8 @@
 # all can use
 
 import time
-import os
 import logging
 import pyaudio
-import sys
 from threading import Thread, Event
 
 from kalliope import Utils
@@ -22,24 +20,22 @@ class HotwordDetector(Thread):
 
     :param keyword	: decoder model file path, a string or a list of strings
     """
-    def __init__(self, keyword, detected_callback, inf_engine):                
+    def __init__(self, keywords, detected_callback, inf_engine):                
         super(HotwordDetector, self).__init__()
         self.detected_callback = detected_callback
-        self.keyword = keyword
+        self.keywords = keywords
         self.found_keyword = False
         self.paused_loop = False
 
-        self.runner = OpenWWRunner( keyword=self.keyword,
+        self.runner = OpenWWRunner( keywords=self.keywords,
                                     on_activation=self.activation,
                                     inf_engine=inf_engine
                                     )
         
         self.runner.start()
 
-# sleeps to handle microphone locks
-# not 100% 
-# often need to start pavucontrol to avoid locking issue
-# can we do that programmatically?
+# sleep is to handle microphone locks
+# edit /etc/pulse/default.pa to remove suspend on idle module
 
     def run(self):
         logger.debug("detecting...")
@@ -47,7 +43,6 @@ class HotwordDetector(Thread):
             if not self.paused_loop:
                 if self.found_keyword:
                     self.pause()                          # We start pausing it here, to avoid double activations
-                    time.sleep(0.1)
                     message = "[OpenWW] Keyword detected"
                     Utils.print_info(message)
                     logger.debug(message)

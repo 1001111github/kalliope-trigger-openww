@@ -5,7 +5,7 @@
 import logging
 import os
 import sys
-from threading import Thread
+from threading import Thread, Event
 
 from kalliope import Utils 
 
@@ -42,22 +42,23 @@ class Openww(Thread):
         if self.callback is None:
             raise MissingParameterException("Callback function is required with OpenWW")
         
-        #onnx until 0.5
+        #onnx as default, more support
         self.inf_engine = kwargs.get('engine', 'onnx')
         if self.inf_engine is None:
             raise MissingParameterException("Inference engine is required with OpenWW")
 
-        # not used until v0.50
-        self.keyword = kwargs.get('model_file', None)
-        if self.keyword is None:
+        keyword = kwargs.get('model_file', None)
+        if keyword is None:
             raise MissingParameterException("Wake word file is required with OpenWW")
-
-        try:
-            os.path.isfile(Utils.get_real_file_path(self.keyword))
-        except TypeError: 
-            raise OpenWWModelNotFound("OpenWW wake word file %s does not exist" % self.pb_file)
+	
+        self.model_list = keyword.split(",")
+        for mdl in self.model_list:
+            try:
+                os.path.isfile(Utils.get_real_file_path(mdl))
+            except TypeError: 
+                raise OpenWWModelNotFound("OpenWW wake word file %s does not exist" % mdl)
         
-        self.detector = HotwordDetector(keyword=self.keyword,
+        self.detector = HotwordDetector(keywords=self.model_list,
                                         detected_callback=self.callback,
 					inf_engine=self.inf_engine,
                                         )
