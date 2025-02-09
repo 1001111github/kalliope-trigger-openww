@@ -3,7 +3,7 @@ Openwakeword Trigger for Kalliope, see details at [dscripka/openWakeWord](https:
 
 ## Installation
 ```bash
-kalliope install --git-url https://github.com/github10011111/kalliope_trigger_openww.git
+kalliope install --git-url https://github.com/1001111github/kalliope_trigger_openww.git
 ```
 
 ## Parameters
